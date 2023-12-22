@@ -24,19 +24,22 @@ jobs:
         source venv/bin/activate
         pip install -r requirements.txt  # Replace with the path to your requirements file
 
-    - name: Create SSH Key File
-      run: echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
-      shell: bash
-
-    - name: Set Permissions on SSH Key File
-      run: chmod 600 deploy_key
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/gitactions.key
+        echo "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/gitactions.key.pub
+        chmod 600 ~/.ssh/gitactions.key
+        chmod 600 ~/.ssh/gitactions.key.pub
+        ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
 
     - name: Copy Airflow DAGs
       run: |
-        rsync -av --exclude='venv' -e "ssh -i deploy_key" dags/ gituser@3.133.145.133:/home/ubuntu/airflow/dags/
+        rsync -av --exclude='venv' -vrm dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
         # Replace 'your_airflow_dags_directory' with the path to your DAGs directory
         # Replace '/path/to/your/airflow/dags/directory' with the path to your Airflow DAGs directory
 
-    # - name: Restart Airflow Scheduler
-    #   run: |
-    #     sudo systemctl restart airflow-scheduler  # Adjust the service name as needed
+    - name: Restart Airflow Scheduler
+      run: |
+        airflow webserver &
+        airflow scheduler

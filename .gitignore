@@ -1,2 +1,4 @@
 *.cer
 .env
+.ssh
+.pem
