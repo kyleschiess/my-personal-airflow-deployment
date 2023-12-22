@@ -33,7 +33,7 @@ jobs:
         chmod 600 deploy_key
 
     - name: Print Host Key
-      run: ssh-keyscan ${{ secrets.USER_IP }} > server_key
+      run: ssh-keyscan ${{ secrets.USER_HOSTNAME }} > server_key
 
     - name: Add Host Key to Known Hosts
       run: |
