@@ -1,9 +1,12 @@
 name: Airflow DAG Deployment
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main  # Adjust the branch as needed
+
+  
 
 jobs:
   deploy_airflow_dags:
