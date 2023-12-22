@@ -32,6 +32,14 @@ jobs:
         echo "${{ secrets.SSH_PRIV_KEY }}" > deploy_key
         chmod 600 deploy_key
 
+    - name: Print Host Key
+      run: ssh-keyscan ${{ secrets.USER_IP }} > server_key
+
+    - name: Add Host Key to Known Hosts
+      run: |
+        mkdir -p ~/.ssh
+        cat server_key >> ~/.ssh/known_hosts
+
     - name: Copy Airflow DAGs
       run: |
         # rsync -av --exclude='venv' -vrm dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
