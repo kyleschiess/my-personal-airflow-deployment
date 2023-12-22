@@ -46,9 +46,4 @@ jobs:
 
     - name: Restart Airflow Scheduler
       run: |
-        airflow version
-        airflow db migrate
-        sleep 10
-        airflow webserver &
-        sleep 10  # Adjust the sleep time based on your Airflow setup
-        airflow scheduler
+        ssh -i deploy_key ${{ secrets.USER_IP }} "source venv/bin/activate && airflow webserver & && airflow scheduler"
