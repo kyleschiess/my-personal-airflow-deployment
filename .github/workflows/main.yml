@@ -30,8 +30,8 @@ jobs:
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh/
-        echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/gitactions.key
-        echo "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/gitactions.key.pub
+        echo -n "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/gitactions.key
+        echo -n "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/gitactions.key.pub
         chmod 600 ~/.ssh/gitactions.key
         chmod 600 ~/.ssh/gitactions.key.pub
         ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
