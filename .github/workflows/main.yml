@@ -1,0 +1,35 @@
+name: Airflow DAG Deployment
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch as needed
+
+jobs:
+  deploy_airflow_dags:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10  # Adjust the Python version as needed
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt  # Replace with the path to your requirements file
+
+    - name: Copy Airflow DAGs
+      run: |
+        rsync -av --exclude='venv' -e "ssh -i ${{ secrets.DEPLOY_KEY }}" dags/ gituser@3.133.145.133:/home/ubuntu/airflow/dags/
+        # Replace 'your_airflow_dags_directory' with the path to your DAGs directory
+        # Replace '/path/to/your/airflow/dags/directory' with the path to your Airflow DAGs directory
+
+    - name: Restart Airflow Scheduler
+      run: |
+        sudo systemctl restart airflow-scheduler  # Adjust the service name as needed
