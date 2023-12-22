@@ -1,2 +1,2 @@
 requests
-airflow
+apache-airflow
