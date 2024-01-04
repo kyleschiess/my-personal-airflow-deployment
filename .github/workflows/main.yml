@@ -47,6 +47,8 @@ jobs:
     - name: Restart Airflow Scheduler
       run: |
         ssh -i deploy_key ${{ secrets.USER_IP }} 
+        python -m venv venv
         source venv/bin/activate
+        airflow db init
         airflow webserver &
         airflow scheduler
