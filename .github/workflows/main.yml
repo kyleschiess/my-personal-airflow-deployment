@@ -49,8 +49,12 @@ jobs:
         rsync -Pav --exclude='venv' -e "ssh -i deploy_key" requirements.txt ${{secrets.USER_IP}}:/home/ubuntu/airflow/
 
     - name: SSH into EC2 Instance and Install Requirements
-      run: |
-        ssh -i deploy_key ${{ secrets.USER_IP }} &&
-        python3 -m venv venv &&
-        source venv/bin/activate &&
-        pip install -r airflow/requirements.txt
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.USER_IP }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIV_KEY }}
+        script: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r airflow/requirements.txt
