@@ -50,10 +50,7 @@ jobs:
 
     - name: SSH into EC2 Instance and Install Requirements
       run: |
-        ssh -i deploy_key ${{ secrets.USER_IP }} 
-        python3 -m venv venv
-        source venv/bin/activate
-        ls -la
-        cd airflow
-        ls -la
+        ssh -i deploy_key ${{ secrets.USER_IP }} &&
+        python3 -m venv venv &&
+        source venv/bin/activate &&
         pip install -r airflow/requirements.txt
