@@ -53,4 +53,4 @@ jobs:
         ssh -i deploy_key ${{ secrets.USER_IP }} 
         python3 -m venv venv
         source venv/bin/activate
-        pip install -r /airflow/requirements.txt
+        pip install -r airflow/requirements.txt
