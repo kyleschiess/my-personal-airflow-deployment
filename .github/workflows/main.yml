@@ -23,7 +23,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m venv venv
+        python3 -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt  # Replace with the path to your requirements file
 
@@ -44,11 +44,13 @@ jobs:
       run: |
         rsync -Pav --exclude='venv' -e "ssh -i deploy_key" dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
 
-    - name: Restart Airflow Scheduler
+    - name: Copy Airflow Requirements
+      run: |
+        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" requirements.txt ${{secrets.USER_IP}}:/home/ubuntu/airflow/
+
+    - name: SSH into EC2 Instance and Install Requirements
       run: |
         ssh -i deploy_key ${{ secrets.USER_IP }} 
-        python -m venv venv
+        python3 -m venv venv
         source venv/bin/activate
-        airflow db init
-        airflow webserver &
-        airflow scheduler
+        pip install -r /airflow/requirements.txt
