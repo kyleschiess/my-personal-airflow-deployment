@@ -1,0 +1,137 @@
+[2024-01-13T18:44:14.713+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-13T18:44:12.648965+00:00 [queued]>
+[2024-01-13T18:44:14.719+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-13T18:44:12.648965+00:00 [queued]>
+[2024-01-13T18:44:14.720+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-13T18:44:14.734+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_staging_fdic_institutions_temp> on 2024-01-13 18:44:12.648965+00:00
+[2024-01-13T18:44:14.739+0000] {standard_task_runner.py:60} INFO - Started process 3723 to run task
+[2024-01-13T18:44:14.753+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_staging', 'create_staging_fdic_institutions_temp', 'manual__2024-01-13T18:44:12.648965+00:00', '--job-id', '254', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-staging.py', '--cfg-path', '/tmp/tmpu4nz7d5v']
+[2024-01-13T18:44:14.757+0000] {standard_task_runner.py:88} INFO - Job 254: Subtask create_staging_fdic_institutions_temp
+[2024-01-13T18:44:14.824+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-13T18:44:12.648965+00:00 [running]> on host c111cf247bc6
+[2024-01-13T18:44:14.909+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='fdic_ncua_staging' AIRFLOW_CTX_TASK_ID='create_staging_fdic_institutions_temp' AIRFLOW_CTX_EXECUTION_DATE='2024-01-13T18:44:12.648965+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-13T18:44:12.648965+00:00'
+[2024-01-13T18:44:14.911+0000] {sql.py:276} INFO - Executing: DROP TABLE IF EXISTS staging.fdic_institutions_temp;
+CREATE TABLE staging.fdic_institutions_temp  (
+    -- pulling from raw.fdic_institutions
+    -- For this evaluation, I'm only pulling a few columns.
+    -- In a real world scenario, I might pull all columns.
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- Institution Name
+    city TEXT, -- City
+    state TEXT, -- `stname`: State
+    date_updated TEXT, -- `dateupdt`: The date this record was last updated in the FDIC API
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, city, state, and date_updated
+    loaded_at TIMESTAMP WITH TIME ZONE, -- The date the most up-to-date version of this record was loaded into the table
+    scraped_at TIMESTAMP WITH TIME ZONE -- The date this record was scraped
+);          
+
+INSERT INTO staging.fdic_institutions_temp  (
+    WITH inst AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_institutions
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    inst_latest AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at AS scraped_at
+        FROM inst
+        GROUP BY
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        name,
+        city,
+        stname AS state,
+        dateupdt AS date_updated,
+        md5(
+            cert::TEXT || COALESCE(name,'') || COALESCE(city,'') || COALESCE(stname,'') || COALESCE(dateupdt,'') || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM inst_latest
+);
+[2024-01-13T18:44:14.918+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T18:44:14.926+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T18:44:15.196+0000] {sql.py:432} INFO - Running statement: DROP TABLE IF EXISTS staging.fdic_institutions_temp;
+CREATE TABLE staging.fdic_institutions_temp  (
+    -- pulling from raw.fdic_institutions
+    -- For this evaluation, I'm only pulling a few columns.
+    -- In a real world scenario, I might pull all columns.
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- Institution Name
+    city TEXT, -- City
+    state TEXT, -- `stname`: State
+    date_updated TEXT, -- `dateupdt`: The date this record was last updated in the FDIC API
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, city, state, and date_updated
+    loaded_at TIMESTAMP WITH TIME ZONE, -- The date the most up-to-date version of this record was loaded into the table
+    scraped_at TIMESTAMP WITH TIME ZONE -- The date this record was scraped
+);          
+
+INSERT INTO staging.fdic_institutions_temp  (
+    WITH inst AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_institutions
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    inst_latest AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at AS scraped_at
+        FROM inst
+        GROUP BY
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        name,
+        city,
+        stname AS state,
+        dateupdt AS date_updated,
+        md5(
+            cert::TEXT || COALESCE(name,'') || COALESCE(city,'') || COALESCE(stname,'') || COALESCE(dateupdt,'') || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM inst_latest
+);, parameters: None
+[2024-01-13T18:44:17.322+0000] {sql.py:441} INFO - Rows affected: 55648
+[2024-01-13T18:44:17.382+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=fdic_ncua_staging, task_id=create_staging_fdic_institutions_temp, execution_date=20240113T184412, start_date=20240113T184414, end_date=20240113T184417
+[2024-01-13T18:44:17.416+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-01-13T18:44:17.434+0000] {taskinstance.py:3281} INFO - 1 downstream tasks scheduled from follow-on schedule check

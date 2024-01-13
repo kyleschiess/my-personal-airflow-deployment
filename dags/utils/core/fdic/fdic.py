@@ -1,7 +1,38 @@
-import requests
+import requests, logging
 import time
 from datetime import datetime
 from utils.core.helpers.helpers import previous_quarter
+
+def check_for_new_fdic_data(hook, today, last_quarter):
+    found_new_data = False
+
+    # check raw.fdic_institutions for a repdte of the last quarter
+    last_q_str = last_quarter.strftime("%Y%m%d")
+    sql = f"""
+        SELECT
+            COUNT(*)
+        FROM raw.fdic_institutions
+        WHERE repdte = '{last_q_str}'
+    """
+    conn = hook.get_conn()
+    cur = conn.cursor()
+    cur.execute(sql)
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+
+    if count > 0:
+        logging.info("Already have FDIC data for last quarter")
+        return found_new_data
+
+    res_json = fdic_request("/financials", offset=0, limit=10, today_dt=today, last_quarter_dt=last_quarter)
+    if res_json['meta']['total'] > 0:
+        logging.info("Found new FDIC data")
+        found_new_data = True
+        return found_new_data
+    else:
+        logging.info("Did not find new FDIC data")
+        return found_new_data
 
 def fdic_request(endpoint, today_dt, last_quarter_dt, offset=0, limit=10000, timeout=1):
     url = 'https://banks.data.fdic.gov/api' + endpoint

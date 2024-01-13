@@ -7,16 +7,16 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from utils.core.helpers.postgres import insert_to_pg
 from utils.core.helpers.helpers import previous_quarter
-from utils.core.ncua.ncua import get_ncua_call_report_file, ncua_call_report_to_s3
-from utils.core.fdic.fdic import get_fdic_data
+from utils.core.ncua.ncua import check_for_new_ncua_data, get_ncua_call_report_file, ncua_call_report_to_s3
+from utils.core.fdic.fdic import check_for_new_fdic_data, get_fdic_data
 
 pg_hook = PostgresHook(postgres_conn_id="alpharank_de_eval")
 s3_hook = S3Hook(aws_conn_id="my-aws")
 
-@dag(schedule="@monthly", start_date=datetime(2021, 12, 1), catchup=False)
-def extract_fdic_ncua():
+@dag(schedule="@daily", start_date=datetime(2021, 12, 1), catchup=False)
+def fdic_ncua_ingest():
     
-    today = datetime(2023, 2, 15)
+    today = datetime.today()
 
     last_quarter = previous_quarter(today)
     lq_year = str(last_quarter.year)
@@ -38,7 +38,6 @@ def extract_fdic_ncua():
     @task(task_id="extract_ncua_call_report_data", retries=0)
     def extract_ncua_call_report_data():
         ncua_call_report_to_s3(s3_hook, lq_year, lq_month)
-
 
     @task(task_id="s3_check_for_ncua_call_report_data", retries=3, retry_delay=timedelta(seconds=10))
     def s3_check_for_ncua_call_report_data():
@@ -106,27 +105,35 @@ def extract_fdic_ncua():
         extract_fdic_financials()
 
 
-    @task_group(group_id="ncua_extract")
-    def ncua_extract():
-        extract_ncua_call_report_data() >> s3_check_for_ncua_call_report_data()
-
-
     @task_group(group_id="ncua")
     def ncua():
-        extract_ncua_credit_union_branch_information()
-        extract_ncua_acct_desc()
-        extract_ncua_fs220()
+        extract_ncua_call_report_data() >> s3_check_for_ncua_call_report_data() >> [
+            extract_ncua_credit_union_branch_information(),
+            extract_ncua_acct_desc(),
+            extract_ncua_fs220(),
+        ]
 
-    @task_group(group_id="fdic_ncua")
-    def fdic_ncua():
-        fdic()
-        ncua_extract() >> ncua()
 
     trigger_staging_dag = TriggerDagRunOperator(
         task_id="trigger_staging_dag",
         trigger_dag_id="fdic_ncua_staging"
     )
 
-    fdic_ncua() >> trigger_staging_dag
 
-extract_fdic_ncua()
+    @task.short_circuit()
+    def t__check_for_new_fdic_data() -> bool:
+        found_new_data = check_for_new_fdic_data(hook=pg_hook, today=today, last_quarter=last_quarter)
+        return found_new_data
+    
+
+    @task.short_circuit()
+    def t__check_for_new_ncua_data() -> bool:
+        found_new_data = check_for_new_ncua_data(hook=pg_hook, last_quarter=last_quarter, lq_year=lq_year, lq_month=lq_month)
+        return found_new_data
+                
+        
+    t__check_for_new_fdic_data() >> fdic() >> trigger_staging_dag
+    t__check_for_new_ncua_data() >> ncua() >> trigger_staging_dag
+
+    
+fdic_ncua_ingest()

@@ -39,21 +39,27 @@ jobs:
         mkdir -p ~/.ssh
         cat server_key >> ~/.ssh/known_hosts
 
-    - name: Copy Airflow DAGs
-      run: |
-        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
+    # - name: Copy Airflow DAGs
+    #   run: |
+    #     rsync -Pav --exclude='venv' -e "ssh -i deploy_key" dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
 
-    - name: Copy Airflow Requirements
-      run: |
-        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" requirements.txt ${{secrets.USER_IP}}:/home/ubuntu/airflow/
+    # - name: Copy Airflow Requirements
+    #   run: |
+    #     rsync -Pav --exclude='venv' -e "ssh -i deploy_key" requirements.txt ${{secrets.USER_IP}}:/home/ubuntu/airflow/
 
-    - name: SSH into EC2 Instance and Install Requirements
+    - name: Dump Repo To /my-personal-airflow-deployment on EC2 Instance
+      run: |
+        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" . ${{secrets.USER_IP}}:/home/ubuntu/my-personal-airflow-deployment/
+
+    - name: SSH into EC2 Instance and Run Docker Commands
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.IP }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PRIV_KEY }}
         script: |
-          python3 -m venv venv
+          cd my-personal-airflow-deployment
           source venv/bin/activate
-          pip install -r airflow/requirements.txt
+          docker compose up airflow-init
+          docker compose up
+          
