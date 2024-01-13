@@ -6,3 +6,4 @@ shortcuts.md
 *.ipynb
 *.code-workspace
 venv
+logs

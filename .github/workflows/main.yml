@@ -32,34 +32,26 @@ jobs:
         chmod 600 deploy_key
 
     - name: Print Host Key
-      run: ssh-keyscan ${{ secrets.USER_HOSTNAME }} > server_key
+      run: ssh-keyscan ${{ secrets.HOST }} > server_key
 
     - name: Add Host Key to Known Hosts
       run: |
         mkdir -p ~/.ssh
         cat server_key >> ~/.ssh/known_hosts
 
-    # - name: Copy Airflow DAGs
-    #   run: |
-    #     rsync -Pav --exclude='venv' -e "ssh -i deploy_key" dags/ ${{secrets.USER_IP}}:/home/ubuntu/airflow/dags/
-
-    # - name: Copy Airflow Requirements
-    #   run: |
-    #     rsync -Pav --exclude='venv' -e "ssh -i deploy_key" requirements.txt ${{secrets.USER_IP}}:/home/ubuntu/airflow/
-
     - name: Dump Repo To /my-personal-airflow-deployment on EC2 Instance
       run: |
-        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" . ${{secrets.USER_IP}}:/home/ubuntu/my-personal-airflow-deployment/
+        rsync -Pav --exclude='venv' -e "ssh -i deploy_key" . ${{secrets.USERNAME}}@${{secrets.HOST}}:/home/ubuntu/my-personal-airflow-deployment/
 
-    - name: SSH into EC2 Instance and Run Docker Commands
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.IP }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_PRIV_KEY }}
-        script: |
-          cd my-personal-airflow-deployment
-          source venv/bin/activate
-          docker compose up airflow-init
-          docker compose up
+    # - name: SSH into EC2 Instance and Run Docker Commands
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     key: ${{ secrets.SSH_PRIV_KEY }}
+    #     script: |
+    #       cd my-personal-airflow-deployment
+    #       source venv/bin/activate
+    #       docker compose up airflow-init
+    #       docker compose up
           
