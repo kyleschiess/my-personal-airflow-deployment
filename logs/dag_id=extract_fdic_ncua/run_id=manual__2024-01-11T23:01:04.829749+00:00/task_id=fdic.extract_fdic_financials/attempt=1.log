@@ -1,0 +1,28 @@
+[2024-01-11T23:01:05.577+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: extract_fdic_ncua.fdic.extract_fdic_financials manual__2024-01-11T23:01:04.829749+00:00 [queued]>
+[2024-01-11T23:01:05.583+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: extract_fdic_ncua.fdic.extract_fdic_financials manual__2024-01-11T23:01:04.829749+00:00 [queued]>
+[2024-01-11T23:01:05.583+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-11T23:01:05.590+0000] {taskinstance.py:2192} INFO - Executing <Task(_PythonDecoratedOperator): fdic.extract_fdic_financials> on 2024-01-11 23:01:04.829749+00:00
+[2024-01-11T23:01:05.593+0000] {standard_task_runner.py:60} INFO - Started process 3672 to run task
+[2024-01-11T23:01:05.597+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'extract_fdic_ncua', 'fdic.extract_fdic_financials', 'manual__2024-01-11T23:01:04.829749+00:00', '--job-id', '14', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-ingest.py', '--cfg-path', '/tmp/tmp6bimksga']
+[2024-01-11T23:01:05.598+0000] {standard_task_runner.py:88} INFO - Job 14: Subtask fdic.extract_fdic_financials
+[2024-01-11T23:01:05.631+0000] {task_command.py:423} INFO - Running <TaskInstance: extract_fdic_ncua.fdic.extract_fdic_financials manual__2024-01-11T23:01:04.829749+00:00 [running]> on host c111cf247bc6
+[2024-01-11T23:01:05.685+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='extract_fdic_ncua' AIRFLOW_CTX_TASK_ID='fdic.extract_fdic_financials' AIRFLOW_CTX_EXECUTION_DATE='2024-01-11T23:01:04.829749+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-11T23:01:04.829749+00:00'
+[2024-01-11T23:01:05.686+0000] {taskinstance.py:2699} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/decorators/base.py", line 242, in execute
+    return_value = super().execute(context)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/fdic-ncua-ingest.py", line 55, in extract_fdic_financials
+    response = fdic_request("/financials", offset=offset, limit=limit)
+  File "/opt/airflow/dags/utils/core/fdic/fdic.py", line 19, in fdic_request
+    last_quarter = previous_quarter(datetime.date(2023, 12, 1)).strftime('%Y%m%d')
+TypeError: descriptor 'date' for 'datetime.datetime' objects doesn't apply to a 'int' object
+[2024-01-11T23:01:05.697+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=extract_fdic_ncua, task_id=fdic.extract_fdic_financials, execution_date=20240111T230104, start_date=20240111T230105, end_date=20240111T230105
+[2024-01-11T23:01:05.703+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 14 for task fdic.extract_fdic_financials (descriptor 'date' for 'datetime.datetime' objects doesn't apply to a 'int' object; 3672)
+[2024-01-11T23:01:05.732+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-01-11T23:01:05.742+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

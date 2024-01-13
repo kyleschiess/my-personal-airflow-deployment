@@ -1,0 +1,131 @@
+[2024-01-13T00:52:16.937+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_data_marts.create_data_marts_ncua_credit_unions manual__2024-01-13T00:52:16.320019+00:00 [queued]>
+[2024-01-13T00:52:16.948+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_data_marts.create_data_marts_ncua_credit_unions manual__2024-01-13T00:52:16.320019+00:00 [queued]>
+[2024-01-13T00:52:16.949+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-13T00:52:16.962+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_data_marts_ncua_credit_unions> on 2024-01-13 00:52:16.320019+00:00
+[2024-01-13T00:52:16.968+0000] {standard_task_runner.py:60} INFO - Started process 13520 to run task
+[2024-01-13T00:52:16.975+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_data_marts', 'create_data_marts_ncua_credit_unions', 'manual__2024-01-13T00:52:16.320019+00:00', '--job-id', '208', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-data-marts.py', '--cfg-path', '/tmp/tmp62ermwjc']
+[2024-01-13T00:52:16.978+0000] {standard_task_runner.py:88} INFO - Job 208: Subtask create_data_marts_ncua_credit_unions
+[2024-01-13T00:52:17.024+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_data_marts.create_data_marts_ncua_credit_unions manual__2024-01-13T00:52:16.320019+00:00 [running]> on host c111cf247bc6
+[2024-01-13T00:52:17.077+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='fdic_ncua_data_marts' AIRFLOW_CTX_TASK_ID='create_data_marts_ncua_credit_unions' AIRFLOW_CTX_EXECUTION_DATE='2024-01-13T00:52:16.320019+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-13T00:52:16.320019+00:00'
+[2024-01-13T00:52:17.078+0000] {sql.py:276} INFO - Executing: DROP TABLE IF EXISTS data_marts.ncua_credit_unions;
+CREATE TABLE data_marts.ncua_credit_unions (
+    -- pulling from staging.ncua_cu_branch_info and staging.ncua_fs220
+    cu_number NUMERIC,
+    name TEXT,
+    city TEXT,
+    state TEXT,
+    state_code TEXT,
+    total_assets NUMERIC,
+    total_deposits NUMERIC,
+    report_date TEXT,
+    dim_id TEXT GENERATED ALWAYS AS (
+        md5(
+            cu_number::TEXT || report_date
+        )
+    ) STORED PRIMARY KEY
+);
+
+INSERT INTO data_marts.ncua_credit_unions (
+    WITH cubi AS (
+        SELECT DISTINCT ON (cu_number)
+            cu_number,
+            name,
+            city,
+            state_code,
+            cycle_date,
+            scraped_at
+        FROM staging.ncua_cu_branch_info
+        ORDER BY cu_number, cycle_date::DATE DESC
+    ),
+
+    fs220 AS (
+        SELECT DISTINCT ON (cu_number, cycle_date::DATE)
+            cu_number,
+            cycle_date,
+            total_assets,
+            total_deposits,
+            scraped_at
+        FROM staging.ncua_fs220
+        ORDER BY cu_number, cycle_date::DATE DESC
+    )
+
+    SELECT
+        f.cu_number::NUMERIC,
+        c.name,
+        c.city,
+        utils.state,
+        c.state_code,
+        f.total_assets,
+        f.total_deposits,
+        f.cycle_date AS report_date
+    FROM fs220 AS f
+    LEFT JOIN cubi AS c
+        ON c.cu_number = f.cu_number
+    LEFT JOIN utils.states AS utils
+        ON utils.alpha2 = c.state_code
+
+);
+[2024-01-13T00:52:17.083+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T00:52:17.091+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T00:52:17.368+0000] {sql.py:432} INFO - Running statement: DROP TABLE IF EXISTS data_marts.ncua_credit_unions;
+CREATE TABLE data_marts.ncua_credit_unions (
+    -- pulling from staging.ncua_cu_branch_info and staging.ncua_fs220
+    cu_number NUMERIC,
+    name TEXT,
+    city TEXT,
+    state TEXT,
+    state_code TEXT,
+    total_assets NUMERIC,
+    total_deposits NUMERIC,
+    report_date TEXT,
+    dim_id TEXT GENERATED ALWAYS AS (
+        md5(
+            cu_number::TEXT || report_date
+        )
+    ) STORED PRIMARY KEY
+);
+
+INSERT INTO data_marts.ncua_credit_unions (
+    WITH cubi AS (
+        SELECT DISTINCT ON (cu_number)
+            cu_number,
+            name,
+            city,
+            state_code,
+            cycle_date,
+            scraped_at
+        FROM staging.ncua_cu_branch_info
+        ORDER BY cu_number, cycle_date::DATE DESC
+    ),
+
+    fs220 AS (
+        SELECT DISTINCT ON (cu_number, cycle_date::DATE)
+            cu_number,
+            cycle_date,
+            total_assets,
+            total_deposits,
+            scraped_at
+        FROM staging.ncua_fs220
+        ORDER BY cu_number, cycle_date::DATE DESC
+    )
+
+    SELECT
+        f.cu_number::NUMERIC,
+        c.name,
+        c.city,
+        utils.state,
+        c.state_code,
+        f.total_assets,
+        f.total_deposits,
+        f.cycle_date AS report_date
+    FROM fs220 AS f
+    LEFT JOIN cubi AS c
+        ON c.cu_number = f.cu_number
+    LEFT JOIN utils.states AS utils
+        ON utils.alpha2 = c.state_code
+
+);, parameters: None
+[2024-01-13T00:52:17.825+0000] {sql.py:441} INFO - Rows affected: 14346
+[2024-01-13T00:52:17.879+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=fdic_ncua_data_marts, task_id=create_data_marts_ncua_credit_unions, execution_date=20240113T005216, start_date=20240113T005216, end_date=20240113T005217
+[2024-01-13T00:52:17.897+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-01-13T00:52:17.907+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

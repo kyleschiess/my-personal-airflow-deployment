@@ -1,0 +1,133 @@
+[2024-01-13T01:02:14.243+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_data_marts.create_data_marts_fdic_banks manual__2024-01-13T01:02:13.199076+00:00 [queued]>
+[2024-01-13T01:02:14.248+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_data_marts.create_data_marts_fdic_banks manual__2024-01-13T01:02:13.199076+00:00 [queued]>
+[2024-01-13T01:02:14.248+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-13T01:02:14.255+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_data_marts_fdic_banks> on 2024-01-13 01:02:13.199076+00:00
+[2024-01-13T01:02:14.259+0000] {standard_task_runner.py:60} INFO - Started process 13735 to run task
+[2024-01-13T01:02:14.262+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_data_marts', 'create_data_marts_fdic_banks', 'manual__2024-01-13T01:02:13.199076+00:00', '--job-id', '237', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-data-marts.py', '--cfg-path', '/tmp/tmp3szdx_yt']
+[2024-01-13T01:02:14.263+0000] {standard_task_runner.py:88} INFO - Job 237: Subtask create_data_marts_fdic_banks
+[2024-01-13T01:02:14.290+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_data_marts.create_data_marts_fdic_banks manual__2024-01-13T01:02:13.199076+00:00 [running]> on host c111cf247bc6
+[2024-01-13T01:02:14.328+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='fdic_ncua_data_marts' AIRFLOW_CTX_TASK_ID='create_data_marts_fdic_banks' AIRFLOW_CTX_EXECUTION_DATE='2024-01-13T01:02:13.199076+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-13T01:02:13.199076+00:00'
+[2024-01-13T01:02:14.329+0000] {sql.py:276} INFO - Executing: DROP TABLE IF EXISTS data_marts.fdic_banks;
+CREATE TABLE data_marts.fdic_banks (
+    -- pulling from staging.fdic_institutions and staging.fdic_financials
+    cert NUMERIC,
+    name TEXT,
+    city TEXT,
+    state TEXT,
+    state_code TEXT,
+    total_assets NUMERIC,
+    total_deposits NUMERIC,
+    report_date TEXT,
+    dim_id TEXT GENERATED ALWAYS AS (
+        md5(
+            cert::TEXT || report_date
+        )
+    ) STORED PRIMARY KEY
+);
+
+INSERT INTO data_marts.fdic_banks (
+    WITH fin AS (
+        SELECT DISTINCT ON (cert, report_date)
+            cert,
+            name,
+            total_assets,
+            total_deposits,
+            report_date,
+            scraped_at
+        FROM staging.fdic_financials
+        ORDER BY cert, report_date, scraped_at DESC
+    ),
+
+    inst AS (
+        SELECT DISTINCT ON (cert)
+            cert,
+            name,
+            city,
+            state,
+            date_updated,
+            scraped_at
+        FROM staging.fdic_institutions
+        ORDER BY cert, scraped_at DESC
+    )
+
+    SELECT
+        fin.cert::NUMERIC,
+        fin.name,
+        inst.city,
+        inst.state,
+        utils.alpha2 AS state_code,
+        fin.total_assets,
+        fin.total_deposits,
+        fin.report_date
+    FROM fin
+    LEFT JOIN inst 
+        ON inst.cert = fin.cert
+    LEFT JOIN utils.states AS utils
+        ON utils.state = inst.state
+
+);
+[2024-01-13T01:02:14.333+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T01:02:14.339+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-13T01:02:14.611+0000] {sql.py:432} INFO - Running statement: DROP TABLE IF EXISTS data_marts.fdic_banks;
+CREATE TABLE data_marts.fdic_banks (
+    -- pulling from staging.fdic_institutions and staging.fdic_financials
+    cert NUMERIC,
+    name TEXT,
+    city TEXT,
+    state TEXT,
+    state_code TEXT,
+    total_assets NUMERIC,
+    total_deposits NUMERIC,
+    report_date TEXT,
+    dim_id TEXT GENERATED ALWAYS AS (
+        md5(
+            cert::TEXT || report_date
+        )
+    ) STORED PRIMARY KEY
+);
+
+INSERT INTO data_marts.fdic_banks (
+    WITH fin AS (
+        SELECT DISTINCT ON (cert, report_date)
+            cert,
+            name,
+            total_assets,
+            total_deposits,
+            report_date,
+            scraped_at
+        FROM staging.fdic_financials
+        ORDER BY cert, report_date, scraped_at DESC
+    ),
+
+    inst AS (
+        SELECT DISTINCT ON (cert)
+            cert,
+            name,
+            city,
+            state,
+            date_updated,
+            scraped_at
+        FROM staging.fdic_institutions
+        ORDER BY cert, scraped_at DESC
+    )
+
+    SELECT
+        fin.cert::NUMERIC,
+        fin.name,
+        inst.city,
+        inst.state,
+        utils.alpha2 AS state_code,
+        fin.total_assets,
+        fin.total_deposits,
+        fin.report_date
+    FROM fin
+    LEFT JOIN inst 
+        ON inst.cert = fin.cert
+    LEFT JOIN utils.states AS utils
+        ON utils.state = inst.state
+
+);, parameters: None
+[2024-01-13T01:02:15.384+0000] {sql.py:441} INFO - Rows affected: 18913
+[2024-01-13T01:02:15.434+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=fdic_ncua_data_marts, task_id=create_data_marts_fdic_banks, execution_date=20240113T010213, start_date=20240113T010214, end_date=20240113T010215
+[2024-01-13T01:02:15.455+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-01-13T01:02:15.464+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

@@ -1,0 +1,15 @@
+[2024-01-12T15:02:58.689+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T15:02:57.322154+00:00 [queued]>
+[2024-01-12T15:02:58.698+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T15:02:57.322154+00:00 [queued]>
+[2024-01-12T15:02:58.698+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T15:02:58.706+0000] {taskinstance.py:2192} INFO - Executing <Task(_PythonDecoratedOperator): ncua_extract.extract_ncua_call_report_data> on 2024-01-12 15:02:57.322154+00:00
+[2024-01-12T15:02:58.710+0000] {standard_task_runner.py:60} INFO - Started process 4105 to run task
+[2024-01-12T15:02:58.713+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'extract_fdic_ncua', 'ncua_extract.extract_ncua_call_report_data', 'manual__2024-01-12T15:02:57.322154+00:00', '--job-id', '36', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-ingest.py', '--cfg-path', '/tmp/tmp3rv1mkbb']
+[2024-01-12T15:02:58.714+0000] {standard_task_runner.py:88} INFO - Job 36: Subtask ncua_extract.extract_ncua_call_report_data
+[2024-01-12T15:02:58.741+0000] {task_command.py:423} INFO - Running <TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T15:02:57.322154+00:00 [running]> on host c111cf247bc6
+[2024-01-12T15:02:58.778+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='extract_fdic_ncua' AIRFLOW_CTX_TASK_ID='ncua_extract.extract_ncua_call_report_data' AIRFLOW_CTX_EXECUTION_DATE='2024-01-12T15:02:57.322154+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-12T15:02:57.322154+00:00'
+[2024-01-12T15:02:59.678+0000] {base.py:83} INFO - Using connection ID 'my-aws' for task execution.
+[2024-01-12T15:02:59.678+0000] {connection_wrapper.py:378} INFO - AWS Connection (conn_id='my-aws', conn_type='aws') credentials retrieved from login and password.
+[2024-01-12T15:03:09.778+0000] {python.py:201} INFO - Done. Returned value was: {'year': '2023', 'quarter': '09'}
+[2024-01-12T15:03:09.832+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=extract_fdic_ncua, task_id=ncua_extract.extract_ncua_call_report_data, execution_date=20240112T150257, start_date=20240112T150258, end_date=20240112T150309
+[2024-01-12T15:03:09.898+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-01-12T15:03:09.928+0000] {taskinstance.py:3281} INFO - 1 downstream tasks scheduled from follow-on schedule check

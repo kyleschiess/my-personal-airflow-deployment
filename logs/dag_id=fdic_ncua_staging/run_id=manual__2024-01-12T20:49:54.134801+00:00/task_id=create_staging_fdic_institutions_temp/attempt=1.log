@@ -1,0 +1,52 @@
+[2024-01-12T20:49:54.883+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:49:54.134801+00:00 [queued]>
+[2024-01-12T20:49:54.890+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:49:54.134801+00:00 [queued]>
+[2024-01-12T20:49:54.891+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T20:49:54.898+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_staging_fdic_institutions_temp> on 2024-01-12 20:49:54.134801+00:00
+[2024-01-12T20:49:54.902+0000] {standard_task_runner.py:60} INFO - Started process 9574 to run task
+[2024-01-12T20:49:54.906+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_staging', 'create_staging_fdic_institutions_temp', 'manual__2024-01-12T20:49:54.134801+00:00', '--job-id', '100', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-staging.py', '--cfg-path', '/tmp/tmpt9z5cpcy']
+[2024-01-12T20:49:54.908+0000] {standard_task_runner.py:88} INFO - Job 100: Subtask create_staging_fdic_institutions_temp
+[2024-01-12T20:49:54.944+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:49:54.134801+00:00 [running]> on host c111cf247bc6
+[2024-01-12T20:49:54.981+0000] {abstractoperator.py:708} ERROR - Exception rendering Jinja template for task 'create_staging_fdic_institutions_temp', field 'sql'. Template: 'sql/create_staging_fdic_institutions_temp.sql'
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/abstractoperator.py", line 700, in _do_render_template_fields
+    rendered_content = self.render_template(
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/template/templater.py", line 171, in render_template
+    template = jinja_env.get_template(value)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/loaders.py", line 218, in get_source
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: sql/create_staging_fdic_institutions_temp.sql
+[2024-01-12T20:49:54.984+0000] {taskinstance.py:2699} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 2335, in _run_raw_task
+    self._execute_task_with_callbacks(context, test_mode, session=session)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 2466, in _execute_task_with_callbacks
+    task_orig = self.render_templates(context=context)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 2878, in render_templates
+    original_task.render_template_fields(context)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/baseoperator.py", line 1248, in render_template_fields
+    self._do_render_template_fields(self, self.template_fields, context, jinja_env, set())
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/utils/session.py", line 79, in wrapper
+    return func(*args, session=session, **kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/abstractoperator.py", line 700, in _do_render_template_fields
+    rendered_content = self.render_template(
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/template/templater.py", line 171, in render_template
+    template = jinja_env.get_template(value)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/environment.py", line 1010, in get_template
+    return self._load_template(name, globals)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/environment.py", line 969, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/home/airflow/.local/lib/python3.8/site-packages/jinja2/loaders.py", line 218, in get_source
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: sql/create_staging_fdic_institutions_temp.sql
+[2024-01-12T20:49:54.998+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=fdic_ncua_staging, task_id=create_staging_fdic_institutions_temp, execution_date=20240112T204954, start_date=20240112T204954, end_date=20240112T204954
+[2024-01-12T20:49:55.012+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 100 for task create_staging_fdic_institutions_temp (sql/create_staging_fdic_institutions_temp.sql; 9574)
+[2024-01-12T20:49:55.041+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-01-12T20:49:55.085+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

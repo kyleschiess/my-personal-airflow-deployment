@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS utils AUTHORIZATION alpharank_de_eval;

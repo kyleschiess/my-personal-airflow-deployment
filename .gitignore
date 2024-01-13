@@ -2,3 +2,6 @@
 .env
 .ssh
 .pem
+shortcuts.md
+*.ipynb
+*.code-workspace

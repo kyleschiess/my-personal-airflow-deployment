@@ -1,0 +1,13 @@
+[2024-01-12T17:00:50.347+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua.extract_ncua_fs220 manual__2024-01-12T17:00:40.600333+00:00 [queued]>
+[2024-01-12T17:00:50.351+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua.extract_ncua_fs220 manual__2024-01-12T17:00:40.600333+00:00 [queued]>
+[2024-01-12T17:00:50.352+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T17:00:50.359+0000] {taskinstance.py:2192} INFO - Executing <Task(_PythonDecoratedOperator): ncua.extract_ncua_fs220> on 2024-01-12 17:00:40.600333+00:00
+[2024-01-12T17:00:50.363+0000] {standard_task_runner.py:60} INFO - Started process 5964 to run task
+[2024-01-12T17:00:50.365+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'extract_fdic_ncua', 'ncua.extract_ncua_fs220', 'manual__2024-01-12T17:00:40.600333+00:00', '--job-id', '57', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-ingest.py', '--cfg-path', '/tmp/tmp0csmunvw']
+[2024-01-12T17:00:50.366+0000] {standard_task_runner.py:88} INFO - Job 57: Subtask ncua.extract_ncua_fs220
+[2024-01-12T17:00:50.392+0000] {task_command.py:423} INFO - Running <TaskInstance: extract_fdic_ncua.ncua.extract_ncua_fs220 manual__2024-01-12T17:00:40.600333+00:00 [running]> on host c111cf247bc6
+[2024-01-12T17:00:50.436+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='extract_fdic_ncua' AIRFLOW_CTX_TASK_ID='ncua.extract_ncua_fs220' AIRFLOW_CTX_EXECUTION_DATE='2024-01-12T17:00:40.600333+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-12T17:00:40.600333+00:00'
+[2024-01-12T17:00:50.437+0000] {python.py:201} INFO - Done. Returned value was: None
+[2024-01-12T17:00:50.452+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=extract_fdic_ncua, task_id=ncua.extract_ncua_fs220, execution_date=20240112T170040, start_date=20240112T170050, end_date=20240112T170050
+[2024-01-12T17:00:50.498+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-01-12T17:00:50.513+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

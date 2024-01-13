@@ -1,0 +1,152 @@
+[2024-01-12T20:59:16.630+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:59:15.116096+00:00 [queued]>
+[2024-01-12T20:59:16.639+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:59:15.116096+00:00 [queued]>
+[2024-01-12T20:59:16.639+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T20:59:16.650+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_staging_fdic_institutions_temp> on 2024-01-12 20:59:15.116096+00:00
+[2024-01-12T20:59:16.655+0000] {standard_task_runner.py:60} INFO - Started process 9752 to run task
+[2024-01-12T20:59:16.662+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_staging', 'create_staging_fdic_institutions_temp', 'manual__2024-01-12T20:59:15.116096+00:00', '--job-id', '119', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-staging.py', '--cfg-path', '/tmp/tmp07daoszl']
+[2024-01-12T20:59:16.664+0000] {standard_task_runner.py:88} INFO - Job 119: Subtask create_staging_fdic_institutions_temp
+[2024-01-12T20:59:16.713+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_staging.create_staging_fdic_institutions_temp manual__2024-01-12T20:59:15.116096+00:00 [running]> on host c111cf247bc6
+[2024-01-12T20:59:16.783+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='fdic_ncua_staging' AIRFLOW_CTX_TASK_ID='create_staging_fdic_institutions_temp' AIRFLOW_CTX_EXECUTION_DATE='2024-01-12T20:59:15.116096+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-12T20:59:15.116096+00:00'
+[2024-01-12T20:59:16.784+0000] {sql.py:276} INFO - Executing: CREATE TABLE staging.fdic_institutions_temp (
+    -- pulling from raw.fdic_institutions
+    -- For this evaluation, I'm only pulling a few columns.
+    -- In a real world scenario, I might pull all columns.
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- Institution Name
+    city TEXT, -- City
+    state TEXT, -- `stname`: State
+    date_updated TEXT, -- `dateupdt`: The date this record was last updated in the FDIC API
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, city, state, and date_updated
+    loaded_at TIMESTAMP WITH TIME ZONE -- The date the most up-to-date version of this record was loaded into the table
+    --created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);          
+
+INSERT INTO staging.fdic_institutions_temp (
+    WITH inst AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_institutions
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    inst_latest AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at AS scraped_at
+        FROM inst
+        GROUP BY
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        name,
+        city,
+        stname AS state,
+        dateupdt AS date_updated,
+        md5(
+            cert::TEXT || name || city || stname || dateupdt || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM inst_latest
+);
+[2024-01-12T20:59:16.792+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-12T20:59:16.801+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-12T20:59:17.081+0000] {sql.py:432} INFO - Running statement: CREATE TABLE staging.fdic_institutions_temp (
+    -- pulling from raw.fdic_institutions
+    -- For this evaluation, I'm only pulling a few columns.
+    -- In a real world scenario, I might pull all columns.
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- Institution Name
+    city TEXT, -- City
+    state TEXT, -- `stname`: State
+    date_updated TEXT, -- `dateupdt`: The date this record was last updated in the FDIC API
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, city, state, and date_updated
+    loaded_at TIMESTAMP WITH TIME ZONE -- The date the most up-to-date version of this record was loaded into the table
+    --created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);          
+
+INSERT INTO staging.fdic_institutions_temp (
+    WITH inst AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_institutions
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    inst_latest AS (
+        SELECT
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at AS scraped_at
+        FROM inst
+        GROUP BY
+            cert,
+            name,
+            city,
+            stname,
+            dateupdt,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        name,
+        city,
+        stname AS state,
+        dateupdt AS date_updated,
+        md5(
+            cert::TEXT || name || city || stname || dateupdt || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM inst_latest
+);, parameters: None
+[2024-01-12T20:59:17.171+0000] {taskinstance.py:2699} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/operators/sql.py", line 282, in execute
+    output = hook.run(
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/hooks/sql.py", line 392, in run
+    self._run_command(cur, sql_statement, parameters)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/hooks/sql.py", line 437, in _run_command
+    cur.execute(sql_statement)
+psycopg2.errors.SyntaxError: INSERT has more expressions than target columns
+LINE 58:         scraped_at::DATE AS scraped_at
+                 ^
+
+[2024-01-12T20:59:17.177+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=fdic_ncua_staging, task_id=create_staging_fdic_institutions_temp, execution_date=20240112T205915, start_date=20240112T205916, end_date=20240112T205917
+[2024-01-12T20:59:17.183+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 119 for task create_staging_fdic_institutions_temp (INSERT has more expressions than target columns
+LINE 58:         scraped_at::DATE AS scraped_at
+                 ^
+; 9752)
+[2024-01-12T20:59:17.212+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-01-12T20:59:17.232+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

@@ -1,0 +1,14 @@
+[2024-01-11T22:37:31.309+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: extract_fdic_ncua.fdic.extract_fdic_institutions scheduled__2024-01-10T00:00:00+00:00 [queued]>
+[2024-01-11T22:37:31.313+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: extract_fdic_ncua.fdic.extract_fdic_institutions scheduled__2024-01-10T00:00:00+00:00 [queued]>
+[2024-01-11T22:37:31.314+0000] {taskinstance.py:2171} INFO - Starting attempt 2 of 2
+[2024-01-11T22:37:31.320+0000] {taskinstance.py:2192} INFO - Executing <Task(_PythonDecoratedOperator): fdic.extract_fdic_institutions> on 2024-01-10 00:00:00+00:00
+[2024-01-11T22:37:31.322+0000] {standard_task_runner.py:60} INFO - Started process 3301 to run task
+[2024-01-11T22:37:31.325+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'extract_fdic_ncua', 'fdic.extract_fdic_institutions', 'scheduled__2024-01-10T00:00:00+00:00', '--job-id', '7', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-ingest.py', '--cfg-path', '/tmp/tmpbpgbpfcm']
+[2024-01-11T22:37:31.326+0000] {standard_task_runner.py:88} INFO - Job 7: Subtask fdic.extract_fdic_institutions
+[2024-01-11T22:37:31.360+0000] {task_command.py:423} INFO - Running <TaskInstance: extract_fdic_ncua.fdic.extract_fdic_institutions scheduled__2024-01-10T00:00:00+00:00 [running]> on host c111cf247bc6
+[2024-01-11T22:37:31.400+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='extract_fdic_ncua' AIRFLOW_CTX_TASK_ID='fdic.extract_fdic_institutions' AIRFLOW_CTX_EXECUTION_DATE='2024-01-10T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-01-10T00:00:00+00:00'
+[2024-01-11T22:37:41.504+0000] {local_task_job_runner.py:302} WARNING - State of this instance has been externally set to failed. Terminating instance.
+[2024-01-11T22:37:41.507+0000] {process_utils.py:131} INFO - Sending 15 to group 3301. PIDs of all processes in the group: [3301]
+[2024-01-11T22:37:41.508+0000] {process_utils.py:86} INFO - Sending the signal 15 to group 3301
+[2024-01-11T22:37:41.509+0000] {taskinstance.py:2451} ERROR - Received SIGTERM. Terminating subprocesses.
+[2024-01-11T22:37:41.603+0000] {process_utils.py:79} INFO - Process psutil.Process(pid=3301, status='terminated', exitcode=0, started='22:37:30') (3301) terminated with exit code 0

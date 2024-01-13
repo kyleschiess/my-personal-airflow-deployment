@@ -1,0 +1,38 @@
+[2024-01-12T14:59:36.830+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T14:59:36.179736+00:00 [queued]>
+[2024-01-12T14:59:36.834+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T14:59:36.179736+00:00 [queued]>
+[2024-01-12T14:59:36.834+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T14:59:36.841+0000] {taskinstance.py:2192} INFO - Executing <Task(_PythonDecoratedOperator): ncua_extract.extract_ncua_call_report_data> on 2024-01-12 14:59:36.179736+00:00
+[2024-01-12T14:59:36.844+0000] {standard_task_runner.py:60} INFO - Started process 4037 to run task
+[2024-01-12T14:59:36.849+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'extract_fdic_ncua', 'ncua_extract.extract_ncua_call_report_data', 'manual__2024-01-12T14:59:36.179736+00:00', '--job-id', '30', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-ingest.py', '--cfg-path', '/tmp/tmpt1st021u']
+[2024-01-12T14:59:36.851+0000] {standard_task_runner.py:88} INFO - Job 30: Subtask ncua_extract.extract_ncua_call_report_data
+[2024-01-12T14:59:36.896+0000] {task_command.py:423} INFO - Running <TaskInstance: extract_fdic_ncua.ncua_extract.extract_ncua_call_report_data manual__2024-01-12T14:59:36.179736+00:00 [running]> on host c111cf247bc6
+[2024-01-12T14:59:36.938+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='extract_fdic_ncua' AIRFLOW_CTX_TASK_ID='ncua_extract.extract_ncua_call_report_data' AIRFLOW_CTX_EXECUTION_DATE='2024-01-12T14:59:36.179736+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-12T14:59:36.179736+00:00'
+[2024-01-12T14:59:37.734+0000] {base.py:83} INFO - Using connection ID 'my-aws' for task execution.
+[2024-01-12T14:59:37.734+0000] {connection_wrapper.py:378} INFO - AWS Connection (conn_id='my-aws', conn_type='aws') credentials retrieved from login and password.
+[2024-01-12T14:59:38.840+0000] {taskinstance.py:2699} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/decorators/base.py", line 242, in execute
+    return_value = super().execute(context)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/fdic-ncua-ingest.py", line 64, in extract_ncua_call_report_data
+    ncua_call_report_to_s3(s3_hook, lq_year, lq_month)
+  File "/opt/airflow/dags/utils/core/ncua/ncua.py", line 16, in ncua_call_report_to_s3
+    hook.load_string(string_data=str(c), key=f'ncua-call-report-data/{year}-{quarter}.zip', bucket_name='alpharank-de-eval')
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/amazon/aws/hooks/s3.py", line 135, in wrapper
+    return func(*bound_args.args, **bound_args.kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/amazon/aws/hooks/s3.py", line 89, in wrapper
+    return func(*bound_args.args, **bound_args.kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/amazon/aws/hooks/s3.py", line 1137, in load_string
+    self._upload_file_obj(f, key, bucket_name, replace, encrypt, acl_policy)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/amazon/aws/hooks/s3.py", line 1211, in _upload_file_obj
+    raise ValueError(f"The key {key} already exists.")
+ValueError: The key ncua-call-report-data/2023-09.zip already exists.
+[2024-01-12T14:59:38.851+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=extract_fdic_ncua, task_id=ncua_extract.extract_ncua_call_report_data, execution_date=20240112T145936, start_date=20240112T145936, end_date=20240112T145938
+[2024-01-12T14:59:38.860+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 30 for task ncua_extract.extract_ncua_call_report_data (The key ncua-call-report-data/2023-09.zip already exists.; 4037)
+[2024-01-12T14:59:38.877+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-01-12T14:59:38.892+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check

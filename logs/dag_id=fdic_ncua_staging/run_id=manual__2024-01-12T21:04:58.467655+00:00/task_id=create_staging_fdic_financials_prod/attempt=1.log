@@ -1,0 +1,144 @@
+[2024-01-12T21:05:03.334+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_financials_prod manual__2024-01-12T21:04:58.467655+00:00 [queued]>
+[2024-01-12T21:05:03.339+0000] {taskinstance.py:1957} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fdic_ncua_staging.create_staging_fdic_financials_prod manual__2024-01-12T21:04:58.467655+00:00 [queued]>
+[2024-01-12T21:05:03.340+0000] {taskinstance.py:2171} INFO - Starting attempt 1 of 1
+[2024-01-12T21:05:03.348+0000] {taskinstance.py:2192} INFO - Executing <Task(PostgresOperator): create_staging_fdic_financials_prod> on 2024-01-12 21:04:58.467655+00:00
+[2024-01-12T21:05:03.351+0000] {standard_task_runner.py:60} INFO - Started process 9865 to run task
+[2024-01-12T21:05:03.353+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'fdic_ncua_staging', 'create_staging_fdic_financials_prod', 'manual__2024-01-12T21:04:58.467655+00:00', '--job-id', '132', '--raw', '--subdir', 'DAGS_FOLDER/fdic-ncua-staging.py', '--cfg-path', '/tmp/tmpr5ma0evk']
+[2024-01-12T21:05:03.354+0000] {standard_task_runner.py:88} INFO - Job 132: Subtask create_staging_fdic_financials_prod
+[2024-01-12T21:05:03.383+0000] {task_command.py:423} INFO - Running <TaskInstance: fdic_ncua_staging.create_staging_fdic_financials_prod manual__2024-01-12T21:04:58.467655+00:00 [running]> on host c111cf247bc6
+[2024-01-12T21:05:03.423+0000] {taskinstance.py:2481} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='fdic_ncua_staging' AIRFLOW_CTX_TASK_ID='create_staging_fdic_financials_prod' AIRFLOW_CTX_EXECUTION_DATE='2024-01-12T21:04:58.467655+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-01-12T21:04:58.467655+00:00'
+[2024-01-12T21:05:03.423+0000] {sql.py:276} INFO - Executing: CREATE TABLE staging.fdic_financials (
+    -- pulling from raw.fdic_financials
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- `namefull`: Institution Name
+    total_assets NUMERIC, -- `asset`: Total Assets
+    total_deposits NUMERIC, -- `dep`: Total Deposits
+    report_date TEXT, -- `repdte`: Quarterly Report Date
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, total_assets, total_deposits, and report_date
+    loaded_at TIMESTAMP WITH TIME ZONE, -- The date the most up-to-date version of this record was loaded into the table
+    scraped_at TIMESTAMP WITH TIME ZONE -- The date this record was scraped
+);
+
+INSERT INTO staging.fdic_financials (
+    WITH cte1 AS (
+        SELECT
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_financials
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    cte2 AS (
+        SELECT
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            day_scraped_at AS scraped_at
+        FROM cte1
+        GROUP BY
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        namefull AS name,
+        asset::NUMERIC AS total_assets,
+        dep::NUMERIC AS total_deposits,
+        repdte AS report_date,
+        md5(
+            cert::TEXT || namefull || asset || dep || repdte || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM cte2
+);
+[2024-01-12T21:05:03.430+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-12T21:05:03.439+0000] {base.py:83} INFO - Using connection ID 'alpharank_de_eval' for task execution.
+[2024-01-12T21:05:03.741+0000] {sql.py:432} INFO - Running statement: CREATE TABLE staging.fdic_financials (
+    -- pulling from raw.fdic_financials
+    cert NUMERIC, -- FDIC Certificate Number
+    name TEXT, -- `namefull`: Institution Name
+    total_assets NUMERIC, -- `asset`: Total Assets
+    total_deposits NUMERIC, -- `dep`: Total Deposits
+    report_date TEXT, -- `repdte`: Quarterly Report Date
+    dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, total_assets, total_deposits, and report_date
+    loaded_at TIMESTAMP WITH TIME ZONE, -- The date the most up-to-date version of this record was loaded into the table
+    scraped_at TIMESTAMP WITH TIME ZONE -- The date this record was scraped
+);
+
+INSERT INTO staging.fdic_financials (
+    WITH cte1 AS (
+        SELECT
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            scraped_at,
+            -- get scraped_at and convert to YYYYMMDD format
+            to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
+        FROM raw.fdic_financials
+    ),
+
+    -- staging will contain one version of each institution for whatever date it was scraped on
+    cte2 AS (
+        SELECT
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            day_scraped_at AS scraped_at
+        FROM cte1
+        GROUP BY
+            cert,
+            namefull,
+            asset,
+            dep,
+            repdte,
+            day_scraped_at
+    )
+
+    SELECT
+        cert::NUMERIC,
+        namefull AS name,
+        asset::NUMERIC AS total_assets,
+        dep::NUMERIC AS total_deposits,
+        repdte AS report_date,
+        md5(
+            cert::TEXT || namefull || asset || dep || repdte || scraped_at
+        ) AS dim_id,
+        NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
+        scraped_at::DATE AS scraped_at
+    FROM cte2
+);, parameters: None
+[2024-01-12T21:05:03.824+0000] {taskinstance.py:2699} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/operators/sql.py", line 282, in execute
+    output = hook.run(
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/hooks/sql.py", line 392, in run
+    self._run_command(cur, sql_statement, parameters)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/common/sql/hooks/sql.py", line 437, in _run_command
+    cur.execute(sql_statement)
+psycopg2.errors.DuplicateTable: relation "fdic_financials" already exists
+
+[2024-01-12T21:05:03.832+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=fdic_ncua_staging, task_id=create_staging_fdic_financials_prod, execution_date=20240112T210458, start_date=20240112T210503, end_date=20240112T210503
+[2024-01-12T21:05:03.847+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 132 for task create_staging_fdic_financials_prod (relation "fdic_financials" already exists
+; 9865)
+[2024-01-12T21:05:03.856+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-01-12T21:05:03.868+0000] {taskinstance.py:3281} INFO - 0 downstream tasks scheduled from follow-on schedule check
