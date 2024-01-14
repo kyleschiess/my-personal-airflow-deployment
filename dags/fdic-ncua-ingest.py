@@ -18,15 +18,21 @@ def fdic_ncua_ingest():
     
     today = datetime.today()
 
+    ### DEBUG
+    #today = datetime(2023, 6, 29)
+    ###
+
     last_quarter = previous_quarter(today)
     lq_year = str(last_quarter.year)
     lq_month = str(last_quarter.month).zfill(2)
 
+    print(f"Today: {today}")
+    print(f"Last Quarter: {last_quarter}")
 
     @task(task_id="extract_fdic_institutions", retries=0)
     def extract_fdic_institutions():
         # insert into postgres
-        insert_to_pg(hook=pg_hook, schema='raw', table='fdic_institutions', data=get_fdic_data("/institutions"))
+        insert_to_pg(hook=pg_hook, schema='raw', table='fdic_institutions', data=get_fdic_data("/institutions", today_dt=today, last_quarter_dt=last_quarter))
 
 
     @task(task_id="extract_fdic_financials", retries=0)

@@ -46,11 +46,13 @@ def fdic_request(endpoint, today_dt, last_quarter_dt, offset=0, limit=10000, tim
         today = today_dt.strftime('%Y%m%d')
         last_quarter = last_quarter_dt.strftime('%Y%m%d')
 
-        ## DEBUG set today to 2023-12-01 ##
-        #today = datetime.datetime(2023, 12, 1).strftime('%Y%m%d')
-        ###################################
+        #params['filters'] = f'REPDTE:["{last_quarter}" TO "{today}"]'
+        params['filters'] = f'REPDTE:"{last_quarter}"'
 
-        params['filters'] = f'REPDTE:["{last_quarter}" TO "{today}"]'
+    if endpoint == '/institutions':
+        last_quarter = last_quarter_dt.strftime('%m/%d/%Y')
+
+        params['filters'] = f'REPDTE:"{last_quarter}"'
 
     print('params: ', params)
 
