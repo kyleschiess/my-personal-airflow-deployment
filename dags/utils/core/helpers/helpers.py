@@ -18,10 +18,10 @@ def convert_to_snake_case(s):
         for char in s:
             if char == s[0]:
                 char = char.lower()
+            elif char.isnumeric():
+                pass
             elif char.isupper():
                 char = '_' + char.lower()
-            elif char.isnumeric():
-                char = '_' + char
 
             new_s += char
     

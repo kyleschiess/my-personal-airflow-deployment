@@ -7,6 +7,8 @@ CREATE TABLE staging.fdic_institutions{{ params.table_suffix }}  (
     name TEXT, -- Institution Name
     city TEXT, -- City
     state TEXT, -- `stname`: State
+    website TEXT, -- `webaddr`: Website
+    report_date TEXT, -- `repdte`: Quarterly Report Date
     date_updated TEXT, -- `dateupdt`: The date this record was last updated in the FDIC API
     dim_id TEXT PRIMARY KEY, -- MD5 hash of cert, name, city, state, and date_updated
     loaded_at TIMESTAMP WITH TIME ZONE, -- The date the most up-to-date version of this record was loaded into the table
@@ -20,7 +22,9 @@ INSERT INTO staging.fdic_institutions{{ params.table_suffix }}  (
             name,
             city,
             stname,
+            webaddr,
             dateupdt,
+            repdte,
             scraped_at,
             -- get scraped_at and convert to YYYYMMDD format
             to_char(scraped_at, 'YYYYMMDD') AS day_scraped_at
@@ -34,6 +38,8 @@ INSERT INTO staging.fdic_institutions{{ params.table_suffix }}  (
             name,
             city,
             stname,
+            webaddr,
+            repdte,
             dateupdt,
             day_scraped_at AS scraped_at
         FROM inst
@@ -42,6 +48,8 @@ INSERT INTO staging.fdic_institutions{{ params.table_suffix }}  (
             name,
             city,
             stname,
+            webaddr,
+            repdte,
             dateupdt,
             day_scraped_at
     )
@@ -51,9 +59,11 @@ INSERT INTO staging.fdic_institutions{{ params.table_suffix }}  (
         name,
         city,
         stname AS state,
+        webaddr AS website,
+        repdte AS report_date,
         dateupdt AS date_updated,
         md5(
-            cert::TEXT || COALESCE(name,'') || COALESCE(city,'') || COALESCE(stname,'') || COALESCE(dateupdt,'') || scraped_at
+            cert::TEXT || COALESCE(name,'') || COALESCE(city,'') || COALESCE(stname,'') || COALESCE(webaddr,'') || COALESCE(dateupdt,'') || scraped_at
         ) AS dim_id,
         NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
         scraped_at::DATE AS scraped_at

@@ -18,9 +18,9 @@ def fdic_ncua_ingest():
     
     today = datetime.today()
 
-    ### DEBUG
-    #today = datetime(2023, 6, 29)
-    ###
+    ## DEBUG
+    #today = datetime(2022, 9, 29)
+    ##
 
     last_quarter = previous_quarter(today)
     lq_year = str(last_quarter.year)
@@ -104,6 +104,22 @@ def fdic_ncua_ingest():
             )
         )
 
+    @task(task_id="extract_ncua_fs220d", retries=0)
+    def extract_ncua_fs220d():
+        file_name = 'FS220D.txt'
+
+        insert_to_pg(
+            hook=pg_hook, 
+            schema='raw', 
+            table='ncua_fs220d', 
+            data=get_ncua_call_report_file(
+                hook=s3_hook, 
+                year=lq_year, 
+                quarter=lq_month, 
+                file_name=file_name
+            )
+        )
+
     
     @task_group(group_id="fdic")
     def fdic():
@@ -115,8 +131,9 @@ def fdic_ncua_ingest():
     def ncua():
         extract_ncua_call_report_data() >> s3_check_for_ncua_call_report_data() >> [
             extract_ncua_credit_union_branch_information(),
-            extract_ncua_acct_desc(),
+            #extract_ncua_acct_desc(),
             extract_ncua_fs220(),
+            extract_ncua_fs220d(),
         ]
 
 
@@ -140,6 +157,5 @@ def fdic_ncua_ingest():
         
     t__check_for_new_fdic_data() >> fdic() >> trigger_staging_dag
     t__check_for_new_ncua_data() >> ncua() >> trigger_staging_dag
-
     
 fdic_ncua_ingest()

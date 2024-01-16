@@ -6,6 +6,8 @@ CREATE TABLE data_marts.fdic_banks (
     city TEXT,
     state TEXT,
     state_code TEXT,
+    website TEXT,
+    domain TEXT,
     total_assets NUMERIC,
     total_deposits NUMERIC,
     report_date TEXT,
@@ -30,15 +32,16 @@ INSERT INTO data_marts.fdic_banks (
     ),
 
     inst AS (
-        SELECT DISTINCT ON (cert)
+        SELECT DISTINCT ON (cert, date_updated::DATE)
             cert,
             name,
             city,
             state,
+            website,
             date_updated,
             scraped_at
         FROM staging.fdic_institutions
-        ORDER BY cert, scraped_at DESC
+        ORDER BY cert, date_updated::DATE DESC
     )
 
     SELECT
@@ -47,6 +50,12 @@ INSERT INTO data_marts.fdic_banks (
         inst.city,
         inst.state,
         utils.alpha2 AS state_code,
+        inst.website,
+        CASE
+            WHEN
+                inst.website IS NOT NULL THEN SUBSTRING(inst.website from '(?:.*://)?(?:www\.)?([^/?]*)')
+                ELSE NULL
+        END AS domain,
         fin.total_assets,
         fin.total_deposits,
         fin.report_date

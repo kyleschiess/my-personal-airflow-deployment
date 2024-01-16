@@ -7,6 +7,8 @@ CREATE TABLE metrics.bank_cu_asset_dep (
     city TEXT,
     state TEXT,
     state_code TEXT,
+    website TEXT,
+    domain TEXT,
     total_assets NUMERIC,
     total_deposits NUMERIC,
     report_date DATE,
@@ -24,6 +26,8 @@ INSERT INTO metrics.bank_cu_asset_dep (
             city,
             state,
             state_code,
+            website,
+            domain,
             total_assets,
             total_deposits,
             report_date::DATE
@@ -38,6 +42,8 @@ INSERT INTO metrics.bank_cu_asset_dep (
             city,
             state,
             state_code,
+            website,
+            domain,
             total_assets,
             total_deposits,
             report_date::DATE
@@ -84,4 +90,5 @@ INSERT INTO metrics.bank_cu_asset_dep (
             ELSE NULL
         END AS deposits_growth_prev_qtr_tier
     FROM metrics
+    ORDER BY inst_type, id_number, report_date
 );

@@ -6,6 +6,8 @@ CREATE TABLE data_marts.ncua_credit_unions (
     city TEXT,
     state TEXT,
     state_code TEXT,
+    website TEXT,
+    domain TEXT,
     total_assets NUMERIC,
     total_deposits NUMERIC,
     report_date TEXT,
@@ -38,6 +40,16 @@ INSERT INTO data_marts.ncua_credit_unions (
             scraped_at
         FROM staging.ncua_fs220
         ORDER BY cu_number, cycle_date::DATE DESC
+    ),
+
+    fs220d AS (
+        SELECT DISTINCT ON (cu_number, cycle_date::DATE)
+            cu_number,
+            cycle_date,
+            website,
+            scraped_at
+        FROM staging.ncua_fs220d
+        ORDER BY cu_number, cycle_date::DATE DESC
     )
 
     SELECT
@@ -46,12 +58,20 @@ INSERT INTO data_marts.ncua_credit_unions (
         c.city,
         utils.state,
         c.state_code,
+        d.website,
+        CASE
+            WHEN
+                d.website IS NOT NULL THEN SUBSTRING(d.website from '(?:.*://)?(?:www\.)?([^/?]*)')
+                ELSE NULL
+        END AS domain,
         f.total_assets,
         f.total_deposits,
         f.cycle_date AS report_date
     FROM fs220 AS f
     LEFT JOIN cubi AS c
         ON c.cu_number = f.cu_number
+    LEFT JOIN fs220d AS d
+        ON d.cu_number = f.cu_number AND f.cycle_date::DATE = d.cycle_date::DATE
     LEFT JOIN utils.states AS utils
         ON utils.alpha2 = c.state_code
 

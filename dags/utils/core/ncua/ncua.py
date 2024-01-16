@@ -65,9 +65,9 @@ def ncua_call_report_to_s3(hook, year, quarter, timeout=1):
         return zip_found
             
 
-def read_ncua_txt_file_to_array_of_dicts(zfile):
+def read_ncua_txt_file_to_array_of_dicts(zfile, encoding='utf-8'):
     data = []
-    reader = csv.reader(io.TextIOWrapper(zfile, 'utf-8'), delimiter='|')
+    reader = csv.reader(io.TextIOWrapper(zfile, encoding), delimiter='|')
     headers = next(reader)
 
     # headers will have a length of 1, with the first item being the entire header string
@@ -87,19 +87,27 @@ def read_ncua_txt_file_to_array_of_dicts(zfile):
 
     return data
 
+def get_ncua_call_report_file(hook, year, quarter, file_name, encoding='utf-8', retries=1):
+    try:
+        # get object from bucket
+        obj = hook.get_conn().get_object(Bucket='alpharank-de-eval', Key=f'ncua-call-report-data/{year}-{quarter}.zip')
 
-def get_ncua_call_report_file(hook, year, quarter, file_name):
-    # get object from bucket
-    obj = hook.get_conn().get_object(Bucket='alpharank-de-eval', Key=f'ncua-call-report-data/{year}-{quarter}.zip')
-
-    # this file is a zip that contains a folder with the same name as the zip
-    # within the folder are comma-delimited txt files
-    # read each of these txt files into arrays of dicts
-    with zipfile.ZipFile(io.BytesIO(obj['Body'].read())) as z:
-        z.extractall(f'{year}-{quarter}')
-        
-        # get the txt file from the extracted folder
-        with z.open(f'{file_name}') as zfile:
-            data = read_ncua_txt_file_to_array_of_dicts(zfile)
+        # this file is a zip that contains a folder with the same name as the zip
+        # within the folder are comma-delimited txt files
+        # read each of these txt files into arrays of dicts
+        with zipfile.ZipFile(io.BytesIO(obj['Body'].read())) as z:
+            z.extractall(f'{year}-{quarter}')
             
-    return data
+            # get the txt file from the extracted folder
+            with z.open(f'{file_name}') as zfile:
+                data = read_ncua_txt_file_to_array_of_dicts(zfile, encoding)
+                            
+        return data
+    
+    except UnicodeDecodeError as e:
+        print(e)
+        if retries > 0:
+            print('trying ISO-8859-1')
+            return get_ncua_call_report_file(hook, year, quarter, file_name, encoding='ISO-8859-1', retries=retries-1)
+        else:
+            raise e
