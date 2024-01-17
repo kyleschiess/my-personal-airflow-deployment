@@ -47,8 +47,8 @@ INSERT INTO staging.fdic_financials{{ params.table_suffix }}  (
     SELECT
         cert::NUMERIC,
         namefull AS name,
-        asset::NUMERIC AS total_assets,
-        dep::NUMERIC AS total_deposits,
+        asset::NUMERIC * 1000 AS total_assets, -- FDIC reports in thousands
+        dep::NUMERIC * 1000 AS total_deposits,
         repdte AS report_date,
         md5(
             cert::TEXT || namefull || asset || dep || repdte || scraped_at

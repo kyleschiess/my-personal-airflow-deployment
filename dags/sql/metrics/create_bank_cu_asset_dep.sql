@@ -71,7 +71,9 @@ INSERT INTO metrics.bank_cu_asset_dep (
                 WHEN total_assets < 50000000000 THEN '$10B to $50B'
                 WHEN total_assets < 100000000000 THEN '$50B to $100B'
                 WHEN total_assets < 500000000000 THEN '$100B to $500B'
-                ELSE 'Greater than $500B'
+                WHEN total_assets < 1000000000000 THEN '$500B to $1T'
+                WHEN total_assets < 3000000000000 THEN '$1T to $3T'
+                ELSE 'Greater than $3T'
             END AS asset_tier,
             CASE
                 WHEN total_deposits = 0 THEN 0
