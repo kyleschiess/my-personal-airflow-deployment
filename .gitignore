@@ -7,6 +7,11 @@ shortcuts.md
 *.code-workspace
 venv
 logs
-**/__pycache__/
+dags/__pycache__
+dags/utils/__pycache__
+dags/utils/core/__pycache__
+dags/utils/core/fdic/__pycache__
+dags/utils/core/ncua/__pycache__
+dags/utils/core/helpers/__pycache__
 sentence-transformer-models
-**/*.pyc
+*.pyc
