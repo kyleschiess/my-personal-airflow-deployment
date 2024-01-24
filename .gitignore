@@ -7,3 +7,6 @@ shortcuts.md
 *.code-workspace
 venv
 logs
+**/__pycache__/
+sentence-transformer-models
+**/*.pyc
