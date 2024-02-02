@@ -5,10 +5,10 @@ from airflow.decorators import dag, task, task_group
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from utils.core.helpers.postgres import insert_to_pg
+from utils.core.fdic_ncua.postgres import insert_to_pg
 from utils.core.helpers.helpers import previous_quarter
-from utils.core.ncua.ncua import check_for_new_ncua_data, get_ncua_call_report_file, ncua_call_report_to_s3
-from utils.core.fdic.fdic import check_for_new_fdic_data, get_fdic_data
+from utils.core.fdic_ncua.ncua import check_for_new_ncua_data, get_ncua_call_report_file, ncua_call_report_to_s3
+from utils.core.fdic_ncua.fdic import check_for_new_fdic_data, get_fdic_data
 
 pg_hook = PostgresHook(postgres_conn_id="alpharank_de_eval")
 s3_hook = S3Hook(aws_conn_id="my-aws")

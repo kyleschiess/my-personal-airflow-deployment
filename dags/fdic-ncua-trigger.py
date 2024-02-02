@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task, task_group
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from utils.core.ncua.ncua import check_for_new_ncua_data
+from utils.core.fdic_ncua.ncua import check_for_new_ncua_data
 from utils.core.helpers.helpers import previous_quarter
 
-from utils.core.fdic.fdic import check_for_new_fdic_data
+from utils.core.fdic_ncua.fdic import check_for_new_fdic_data
 
 pg_hook = PostgresHook(postgres_conn_id="alpharank_de_eval")
 
@@ -48,4 +48,4 @@ def fdic_ncua_trigger():
 
     trigger_fdic_ncua_ingest.set_upstream(found_new_data)
 
-fdic_ncua_trigger()
+#fdic_ncua_trigger()

@@ -43,15 +43,14 @@ jobs:
       run: |
         rsync -Pav --exclude='venv' -e "ssh -i deploy_key" . ${{secrets.USERNAME}}@${{secrets.HOST}}:/home/ubuntu/my-personal-airflow-deployment/
 
-    # - name: SSH into EC2 Instance and Run Docker Commands
-    #   uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ${{ secrets.HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     key: ${{ secrets.SSH_PRIV_KEY }}
-    #     script: |
-    #       cd my-personal-airflow-deployment
-    #       source venv/bin/activate
-    #       docker compose up airflow-init
-    #       docker compose up
+    - name: SSH into EC2 Instance and Run Docker Commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIV_KEY }}
+        script: |
+          cd my-personal-airflow-deployment
+          docker compose down
+          docker compose up --build
           
