@@ -176,6 +176,36 @@ def fdic_ncua_staging():
             relation_name=temp_relation_name
         ) >> create_staging_ncua_fs220_prod
 
+    #### NCUA FS220A ####
+    create_staging_ncua_fs220a_temp = PostgresOperator(
+        task_id="create_staging_ncua_fs220a_temp",
+        postgres_conn_id="alpharank_de_eval",
+        sql="sql/staging/create_ncua_fs220a.sql",
+        params={
+            "table_suffix": "_temp",
+        }
+    )
+
+    create_staging_ncua_fs220a_prod = PostgresOperator(
+        task_id="create_staging_ncua_fs220a_prod",
+        postgres_conn_id="alpharank_de_eval",
+        sql="sql/staging/create_ncua_fs220a.sql",
+        params={
+            "table_suffix": "",
+        }
+    )
+
+    @task_group(group_id="staging_ncua_fs220a")
+    def staging_ncua_fs220a():
+        temp_relation_name = "staging.ncua_fs220a_temp"
+
+        create_staging_ncua_fs220a_temp >> check_for_duplicates(
+            relation_name=temp_relation_name,
+            dupe_col="dim_id",
+        ) >> drop_temp_table(
+            relation_name=temp_relation_name
+        ) >> create_staging_ncua_fs220a_prod
+
     #### NCUA FS220D ####
     create_staging_ncua_fs220d_temp = PostgresOperator(
         task_id="create_staging_ncua_fs220d_temp",
@@ -206,13 +236,46 @@ def fdic_ncua_staging():
             relation_name=temp_relation_name
         ) >> create_staging_ncua_fs220d_prod
 
+
+    #### NCUA FS220N ####
+    create_staging_ncua_fs220n_temp = PostgresOperator(
+        task_id="create_staging_ncua_fs220n_temp",
+        postgres_conn_id="alpharank_de_eval",
+        sql="sql/staging/create_ncua_fs220n.sql",
+        params={
+            "table_suffix": "_temp",
+        }
+    )
+
+    create_staging_ncua_fs220n_prod = PostgresOperator(
+        task_id="create_staging_ncua_fs220n_prod",
+        postgres_conn_id="alpharank_de_eval",
+        sql="sql/staging/create_ncua_fs220n.sql",
+        params={
+            "table_suffix": "",
+        }
+    )
+
+    @task_group(group_id="staging_ncua_fs220n")
+    def staging_ncua_fs220n():
+        temp_relation_name = "staging.ncua_fs220n_temp"
+
+        create_staging_ncua_fs220n_temp >> check_for_duplicates(
+            relation_name=temp_relation_name,
+            dupe_col="dim_id",
+        ) >> drop_temp_table(
+            relation_name=temp_relation_name
+        ) >> create_staging_ncua_fs220n_prod
+
     @task_group(group_id="staging")
     def staging():
         staging_fdic_institutions()
         staging_fdic_financials()
         staging_ncua_cu_branch_info()
         staging_ncua_fs220()
+        staging_ncua_fs220a()
         staging_ncua_fs220d()
+        staging_ncua_fs220n()
 
     trigger_data_marts_dag = TriggerDagRunOperator(
         task_id="trigger_data_marts_dag",
