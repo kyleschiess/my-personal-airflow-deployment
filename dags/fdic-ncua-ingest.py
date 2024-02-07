@@ -160,11 +160,11 @@ def fdic_ncua_ingest():
     @task_group(group_id="ncua")
     def ncua():
         extract_ncua_call_report_data() >> s3_check_for_ncua_call_report_data() >> [
-            #extract_ncua_credit_union_branch_information(),
+            extract_ncua_credit_union_branch_information(),
             #extract_ncua_acct_desc(),
-            #extract_ncua_fs220(),
+            extract_ncua_fs220(),
             extract_ncua_fs220a(),
-            #extract_ncua_fs220d(),
+            extract_ncua_fs220d(),
             extract_ncua_fs220n()
         ]
 
