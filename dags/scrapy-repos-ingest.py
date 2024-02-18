@@ -19,13 +19,13 @@ s3_hook = S3Hook(aws_conn_id="my-aws")
 
 @dag(schedule=None, start_date=datetime(2021, 12, 1), catchup=False)
 def scrapy_repos_ingest():
-    # scrapy_spiders = Variable.get("scrapy_spiders")
-    # if not scrapy_spiders:
-    #     scrapy_spiders = "projectspider,repospider,contributorsspider,profilespider,companyspider"
-    # scrapy_spiders = scrapy_spiders.split(",")
+    scrapy_spiders = Variable.get("scrapy_spiders")
+    if not scrapy_spiders:
+        scrapy_spiders = "projectspider,repospider,contributorsspider,profilespider,companyspider"
+    scrapy_spiders = scrapy_spiders.split(",")
 
     ## DEBUG ##
-    scrapy_spiders = ["companyspider"]
+    #scrapy_spiders = ["companyspider"]
     ###########
 
 
