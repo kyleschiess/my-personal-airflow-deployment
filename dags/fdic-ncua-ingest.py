@@ -19,15 +19,13 @@ def fdic_ncua_ingest():
     today = datetime.today()
 
     ## DEBUG
-    #today = datetime(2022, 9, 29)
+    #today = datetime(2022, 12, 29)
     ##
 
     last_quarter = previous_quarter(today)
     lq_year = str(last_quarter.year)
     lq_month = str(last_quarter.month).zfill(2)
 
-    print(f"Today: {today}")
-    print(f"Last Quarter: {last_quarter}")
 
     @task(task_id="extract_fdic_institutions", retries=0)
     def extract_fdic_institutions():
@@ -104,6 +102,22 @@ def fdic_ncua_ingest():
             )
         )
 
+    @task(task_id="extract_ncua_fs220a", retries=0)
+    def extract_ncua_fs220a():
+        file_name = 'FS220A.txt'
+
+        insert_to_pg(
+            hook=pg_hook, 
+            schema='raw', 
+            table='ncua_fs220a', 
+            data=get_ncua_call_report_file(
+                hook=s3_hook, 
+                year=lq_year, 
+                quarter=lq_month, 
+                file_name=file_name
+            )
+        )
+
     @task(task_id="extract_ncua_fs220d", retries=0)
     def extract_ncua_fs220d():
         file_name = 'FS220D.txt'
@@ -112,6 +126,22 @@ def fdic_ncua_ingest():
             hook=pg_hook, 
             schema='raw', 
             table='ncua_fs220d', 
+            data=get_ncua_call_report_file(
+                hook=s3_hook, 
+                year=lq_year, 
+                quarter=lq_month, 
+                file_name=file_name
+            )
+        )
+
+    @task(task_id="extract_ncua_fs220n", retries=0)
+    def extract_ncua_fs220n():
+        file_name = 'FS220N.txt'
+
+        insert_to_pg(
+            hook=pg_hook, 
+            schema='raw', 
+            table='ncua_fs220n', 
             data=get_ncua_call_report_file(
                 hook=s3_hook, 
                 year=lq_year, 
@@ -133,7 +163,9 @@ def fdic_ncua_ingest():
             extract_ncua_credit_union_branch_information(),
             #extract_ncua_acct_desc(),
             extract_ncua_fs220(),
+            extract_ncua_fs220a(),
             extract_ncua_fs220d(),
+            extract_ncua_fs220n()
         ]
 
 

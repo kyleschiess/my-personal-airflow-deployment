@@ -74,11 +74,14 @@ def read_ncua_txt_file_to_array_of_dicts(zfile, encoding='utf-8'):
     # remove double quotes and single quotes from the header string
     headers = headers[0].replace('"', '').replace("'", '').split(',')
 
+    # Special case for cu_number column that's spelled "CU_Number" instead of "CU_NUMBER".
+    # Saw this is FS220N.txt
+    headers = [h.replace('CU_Number', 'CU_NUMBER') for h in headers]
+
     # convert headers to snake case
     headers = [convert_to_snake_case(h) for h in headers]
 
     for row in reader:
-        # row will look like this ['"Okay","Well, actually","3"']
         row_reader = csv.reader(io.StringIO(row[0]))
         row = next(row_reader)
 
