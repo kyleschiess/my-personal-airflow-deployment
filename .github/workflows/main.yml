@@ -79,7 +79,7 @@ jobs:
           rm -rf deploy_key
           rm -rf server_key
           sudo docker compose down
-          sudo docker compose up --build
+          sudo docker compose up --build -d
 
     - name: Revoke runner IP address
       run: |
