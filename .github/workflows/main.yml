@@ -10,22 +10,45 @@ on:
 jobs:
   deploy_airflow_dags:
     runs-on: ubuntu-latest
+    env:
+      AWS_INSTANCE_SG_ID: ${{ secrets.AWS_INSTANCE_SG_ID }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
+    # - name: Setup Python
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: "3.10"  # Adjust the Python version as needed
+
+    # - name: Install dependencies
+    #   run: |
+    #     python3 -m venv venv
+    #     source venv/bin/activate
+    #     pip install -r requirements.txt  # Replace with the path to your requirements file
+
+    #### Add GitHub Actions Runner IP to EC2 Security Group. Reference: https://stackoverflow.com/questions/66970875/is-it-possible-to-use-static-ip-when-using-github-actions/72494602#72494602
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        python-version: "3.10"  # Adjust the Python version as needed
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Install dependencies
+    - name: Get runner IP addresses
+      id: ip
+      uses: haythem/public-ip@v1.2
+
+    - name: Whitelist runner IP address
       run: |
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt  # Replace with the path to your requirements file
+        aws ec2 authorize-security-group-ingress \
+          --group-id $AWS_INSTANCE_SG_ID \
+          --protocol tcp \
+          --port 22 \
+          --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
+    #### SSH
     - name: Setup SSH
       run: |
         echo "${{ secrets.SSH_PRIV_KEY }}" > deploy_key
@@ -39,19 +62,30 @@ jobs:
         mkdir -p ~/.ssh
         cat server_key >> ~/.ssh/known_hosts
 
+    #### Dump 
     - name: Dump Repo To /my-personal-airflow-deployment on EC2 Instance
       run: |
         rsync -Pav --exclude='venv' -e "ssh -i deploy_key" . ${{secrets.USERNAME}}@${{secrets.HOST}}:/home/ubuntu/my-personal-airflow-deployment/
 
-    # - name: SSH into EC2 Instance and Run Docker Commands
-    #   uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ${{ secrets.HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     key: ${{ secrets.SSH_PRIV_KEY }}
-    #     script: |
-    #       cd my-personal-airflow-deployment
-    #       source venv/bin/activate
-    #       docker compose up airflow-init
-    #       docker compose up
+    #### Cleanup
+    - name: SSH into EC2 Instance and Run Docker Commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIV_KEY }}
+        script: |
+          cd my-personal-airflow-deployment
+          rm -rf deploy_key
+          rm -rf server_key
+          docker compose down
+          docker compose up --build
+
+    - name: Revoke runner IP address
+      run: |
+        aws ec2 revoke-security-group-ingress \
+          --group-id $AWS_INSTANCE_SG_ID \
+          --protocol tcp \
+          --port 22 \
+          --cidr ${{ steps.ip.outputs.ipv4 }}/32
           
