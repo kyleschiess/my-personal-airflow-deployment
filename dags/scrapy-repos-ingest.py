@@ -25,12 +25,12 @@ def scrapy_repos_ingest():
     scrapy_spiders = scrapy_spiders.split(",")
 
     ## DEBUG ##
-    #scrapy_spiders = ["companyspider"]
+    #scrapy_spiders = ['contributorsspider']
     ###########
 
 
     @task(task_id="check_if_scrapy_job_complete")
-    def check_if_scrapy_job_complete(job_id):
+    def check_if_scrapy_job_complete(job_id, spider_name):
         complete = False
 
         while not complete:
@@ -46,6 +46,12 @@ def scrapy_repos_ingest():
             for job in data['finished']:
                 if job['id'] == job_id:
                     logging.info(f"Job {job_id} is finished: {job}")
+
+                    # check if log exists
+                    url = f'http://host.docker.internal:6800/logs/repos/{spider_name}/{job_id}.log'
+                    response = requests.get(url)
+                    response.raise_for_status()
+
                     complete = True
 
             time.sleep(10)
@@ -105,13 +111,13 @@ def scrapy_repos_ingest():
         job_id = launch_spider(spider_name)
 
         ## DEBUG ##
-        #job_id = '9a325838bebc11ee8de12aa199f11d89'
+        #job_id = 'e31bb378cf3d11ee8bc12aa199f11d89'
         ###########
 
         bucket_name = "personal-s3-bucket-1"
         prefix = f'{spider_name}/{job_id}'
         key = f'{prefix}.json.gz'
-        check_if_scrapy_job_complete(job_id) >> check_s3_bucket(bucket_name=bucket_name, key=key, prefix=prefix) >> s3_to_postgres(bucket_name=bucket_name, key=key, prefix=prefix)
+        check_if_scrapy_job_complete(job_id, spider_name) >> check_s3_bucket(bucket_name=bucket_name, key=key, prefix=prefix) >> s3_to_postgres(bucket_name=bucket_name, key=key, prefix=prefix)
         
 
     task_groups = []
@@ -124,5 +130,7 @@ def scrapy_repos_ingest():
     )
 
     chain(*task_groups + [trigger_staging_dag])
+
+    #task_groups
 
 scrapy_repos_ingest()
