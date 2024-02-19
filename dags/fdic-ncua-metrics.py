@@ -10,7 +10,7 @@ def fdic_ncua_metrics():
     #### BANK CU ASSET DEP ####
     create_metrics_bank_cu_asset_dep = PostgresOperator(
         task_id="create_metrics_bank_cu_asset_dep",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/metrics/create_bank_cu_asset_dep.sql",
     )
     

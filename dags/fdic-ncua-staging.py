@@ -6,7 +6,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
-pg_hook = PostgresHook(postgres_conn_id="alpharank_de_eval")
+pg_hook = PostgresHook(postgres_conn_id="raw_user")
     
 @dag(schedule=None, start_date=datetime(2021, 12, 1), catchup=False)
 def fdic_ncua_staging():
@@ -55,7 +55,7 @@ def fdic_ncua_staging():
     #### FDIC INSTUTIONS ####
     create_staging_fdic_institutions_temp = PostgresOperator(
         task_id="create_staging_fdic_institutions_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_fdic_institutions.sql",
         # add params
         params={
@@ -65,7 +65,7 @@ def fdic_ncua_staging():
 
     create_staging_fdic_institutions_prod = PostgresOperator(
         task_id="create_staging_fdic_institutions_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_fdic_institutions.sql",
         params={
             "table_suffix": "",
@@ -87,7 +87,7 @@ def fdic_ncua_staging():
     #### FDIC FINANCIALS ####
     create_staging_fdic_financials_temp = PostgresOperator(
         task_id="create_staging_fdic_financials_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_fdic_financials.sql",
         params={
             "table_suffix": "_temp",
@@ -96,7 +96,7 @@ def fdic_ncua_staging():
 
     create_staging_fdic_financials_prod = PostgresOperator(
         task_id="create_staging_fdic_financials_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_fdic_financials.sql",
         params={
             "table_suffix": "",
@@ -118,7 +118,7 @@ def fdic_ncua_staging():
     #### NCUA CREDIT UNION BRANCH INFORMATION ####
     create_staging_ncua_cu_branch_info_temp = PostgresOperator(
         task_id="create_staging_ncua_cu_branch_info_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_cu_branch_info.sql",
         params={
             "table_suffix": "_temp",
@@ -127,7 +127,7 @@ def fdic_ncua_staging():
 
     create_staging_ncua_cu_branch_info_prod = PostgresOperator(
         task_id="create_staging_ncua_cu_branch_info_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_cu_branch_info.sql",
         params={
             "table_suffix": "",
@@ -149,7 +149,7 @@ def fdic_ncua_staging():
     #### NCUA FS220 ####
     create_staging_ncua_fs220_temp = PostgresOperator(
         task_id="create_staging_ncua_fs220_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_fs220.sql",
         params={
             "table_suffix": "_temp",
@@ -158,7 +158,7 @@ def fdic_ncua_staging():
 
     create_staging_ncua_fs220_prod = PostgresOperator(
         task_id="create_staging_ncua_fs220_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_fs220.sql",
         params={
             "table_suffix": "",
@@ -179,7 +179,7 @@ def fdic_ncua_staging():
     #### NCUA FS220A ####
     create_staging_ncua_fs220a_temp = PostgresOperator(
         task_id="create_staging_ncua_fs220a_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/staging/create_ncua_fs220a.sql",
         params={
             "table_suffix": "_temp",
@@ -188,7 +188,7 @@ def fdic_ncua_staging():
 
     create_staging_ncua_fs220a_prod = PostgresOperator(
         task_id="create_staging_ncua_fs220a_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/staging/create_ncua_fs220a.sql",
         params={
             "table_suffix": "",
@@ -209,7 +209,7 @@ def fdic_ncua_staging():
     #### NCUA FS220D ####
     create_staging_ncua_fs220d_temp = PostgresOperator(
         task_id="create_staging_ncua_fs220d_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_fs220d.sql",
         params={
             "table_suffix": "_temp",
@@ -218,7 +218,7 @@ def fdic_ncua_staging():
 
     create_staging_ncua_fs220d_prod = PostgresOperator(
         task_id="create_staging_ncua_fs220d_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/staging/create_ncua_fs220d.sql",
         params={
             "table_suffix": "",
@@ -240,7 +240,7 @@ def fdic_ncua_staging():
     #### NCUA FS220N ####
     create_staging_ncua_fs220n_temp = PostgresOperator(
         task_id="create_staging_ncua_fs220n_temp",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/staging/create_ncua_fs220n.sql",
         params={
             "table_suffix": "_temp",
@@ -249,7 +249,7 @@ def fdic_ncua_staging():
 
     create_staging_ncua_fs220n_prod = PostgresOperator(
         task_id="create_staging_ncua_fs220n_prod",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/staging/create_ncua_fs220n.sql",
         params={
             "table_suffix": "",

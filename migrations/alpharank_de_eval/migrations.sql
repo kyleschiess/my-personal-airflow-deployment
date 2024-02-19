@@ -1177,3 +1177,8 @@ CREATE TABLE raw.ncua_fs220n (
     acct_as0042 TEXT,
     scraped_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE TABLE utils.states (
+    state TEXT,
+    alpha2 TEXT
+);

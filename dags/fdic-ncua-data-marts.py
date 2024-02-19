@@ -11,14 +11,14 @@ def fdic_ncua_data_marts():
     #### FDIC BANKS ####
     create_data_marts_fdic_banks= PostgresOperator(
         task_id="create_data_marts_fdic_banks",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/data_marts/create_fdic_banks.sql",
     )
 
     #### NCUA CREDIT UNIONS ####
     create_data_marts_ncua_credit_unions = PostgresOperator(
         task_id="create_data_marts_ncua_credit_unions",
-        postgres_conn_id="alpharank_de_eval",
+        postgres_conn_id="raw_user",
         sql="sql/fdic_ncua/data_marts/create_ncua_credit_unions.sql",
     )
 

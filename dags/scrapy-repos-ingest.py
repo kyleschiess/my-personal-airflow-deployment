@@ -19,6 +19,7 @@ s3_hook = S3Hook(aws_conn_id="my-aws")
 
 @dag(schedule=None, start_date=datetime(2021, 12, 1), catchup=False)
 def scrapy_repos_ingest():
+    scrapyd_host = Variable.get("scrapyd_host")
     scrapy_spiders = Variable.get("scrapy_spiders")
     if not scrapy_spiders:
         scrapy_spiders = "projectspider,repospider,contributorsspider,profilespider,companyspider"
@@ -35,7 +36,7 @@ def scrapy_repos_ingest():
 
         while not complete:
             # call scrapyd api to check if job is complete
-            url = f'http://host.docker.internal:6800/listjobs.json?project=repos'
+            url = f'http://{scrapyd_host}:6800/listjobs.json?project=repos'
             response = requests.get(url)
             data = response.json()
             
@@ -48,7 +49,7 @@ def scrapy_repos_ingest():
                     logging.info(f"Job {job_id} is finished: {job}")
 
                     # check if log exists
-                    url = f'http://host.docker.internal:6800/logs/repos/{spider_name}/{job_id}.log'
+                    url = f'http://{scrapyd_host}:6800/logs/repos/{spider_name}/{job_id}.log'
                     response = requests.get(url)
                     response.raise_for_status()
 
@@ -99,7 +100,7 @@ def scrapy_repos_ingest():
     @task
     def launch_spider(spider_name: str) -> str:
         # schedule job from scrapyd
-        url = f'http://host.docker.internal:6800/schedule.json?project=repos&spider={spider_name}'
+        url = f'http://{scrapyd_host}:6800/schedule.json?project=repos&spider={spider_name}'
         response = requests.post(url)
         job_id = response.json()['jobid']
         

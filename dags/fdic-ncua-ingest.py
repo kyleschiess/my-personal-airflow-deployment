@@ -10,7 +10,7 @@ from utils.core.helpers.helpers import previous_quarter
 from utils.core.fdic_ncua.ncua import check_for_new_ncua_data, get_ncua_call_report_file, ncua_call_report_to_s3
 from utils.core.fdic_ncua.fdic import check_for_new_fdic_data, get_fdic_data
 
-pg_hook = PostgresHook(postgres_conn_id="alpharank_de_eval")
+pg_hook = PostgresHook(postgres_conn_id="raw_user")
 s3_hook = S3Hook(aws_conn_id="my-aws")
 
 @dag(schedule="@daily", start_date=datetime(2021, 12, 1), catchup=False)
