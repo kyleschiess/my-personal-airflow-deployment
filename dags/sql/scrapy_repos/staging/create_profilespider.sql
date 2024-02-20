@@ -18,11 +18,11 @@ INSERT INTO staging.profilespider{{ params.table_suffix }} (
     WITH c AS (
         SELECT
             link,
-            text_to_num(number_of_repos) AS number_of_repos,
-            text_to_num(number_of_stars) AS number_of_stars,
-            text_to_num(number_of_followers) AS number_of_followers,
-            text_to_num(number_following) AS number_following,
-            text_to_num(number_of_contributions_past_year) AS number_of_contributions_past_year,
+            utils.text_to_num(number_of_repos) AS number_of_repos,
+            utils.text_to_num(number_of_stars) AS number_of_stars,
+            utils.text_to_num(number_of_followers) AS number_of_followers,
+            utils.text_to_num(number_following) AS number_following,
+            utils.text_to_num(number_of_contributions_past_year) AS number_of_contributions_past_year,
             company_name,
             email_domain,
             organizations,

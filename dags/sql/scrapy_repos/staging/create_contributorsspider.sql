@@ -15,7 +15,7 @@ INSERT INTO staging.contributorsspider{{ params.table_suffix }} (
             repo_name,
             source_repo_link,
             profile_link,
-            text_to_num(SPLIT_PART(commits_to_source_repo,' ',1)) AS commits_to_source_repo,
+            utils.text_to_num(SPLIT_PART(commits_to_source_repo,' ',1)) AS commits_to_source_repo,
             NOW()::TIMESTAMP WITH TIME ZONE AS loaded_at,
             scraped_at,
             ROW_NUMBER() OVER (PARTITION BY source_repo_link, profile_link ORDER BY scraped_at DESC) AS rn

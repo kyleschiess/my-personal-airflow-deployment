@@ -26,11 +26,11 @@ INSERT INTO staging.repospider{{ params.table_suffix }} (
             project_link,
             tags,
             languages,
-            text_to_num(pull_requests) AS pull_requests,
-            text_to_num(commits) AS commits,
-            text_to_num(stargazers) AS stargazers,
-            text_to_num(forks) AS forks,
-            text_to_num(contributors) AS contributors,
+            utils.text_to_num(pull_requests) AS pull_requests,
+            utils.text_to_num(commits) AS commits,
+            utils.text_to_num(stargazers) AS stargazers,
+            utils.text_to_num(forks) AS forks,
+            utils.text_to_num(contributors) AS contributors,
             CASE
                 WHEN last_updated != 'null' THEN last_updated::TIMESTAMP WITH TIME ZONE
                 ELSE NULL
